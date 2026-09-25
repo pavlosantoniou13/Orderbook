@@ -17,7 +17,23 @@
 #include <tuple>
 #include <format>
 
+enum class OrderType 
+{
+    GoodTillCancel,
+    FillAndKill
+};
+
+enum class Side 
+{
+    Buy,
+    Sell
+};
+
+using Price = std::int32_t;
+using Quantity = std::uint32_t;
+using OrderId = std::uint32_t;
+
 int main() {
-    
+
     return 0;
 }
