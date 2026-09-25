@@ -307,6 +307,36 @@ private:
                 }
             }
 
+            Trades MatchOrders(OrderModify order)
+            {
+                if (!orders_.contains(order.getOrderId()))
+                    return {};
+                const auto& [existingOrder, _] = orders_.at(order.getOrderId());
+                cancelOrder(order.getOrderId());
+                return addOrder(order.ToOrderPointer(existingOrder->getOrderType()));
+            } 
+            
+            std::size_t Size() const { return orders_.size(); }
+
+            OrderBookLevelInfos getOrderInfos() const
+            {
+                LevelInfos bidInfos, askInfos;
+                bidInfos.reserve(orders_.size());
+                askInfos.reserve(orders_.size());
+
+                auto createLevelInfos = [](Price price, const OrderPointers& orders)
+                {
+                    return LevelInfo{ price, std::accumulate(orders.begin(), orders.end(), (Quantity)0,
+                    [](std::size_t runingSum, const OrderPointer & order)
+                    { return runingSum + order->getRemainingQuantity(); }) };
+                };
+
+                for (const auto& [price, orders] : bids_)
+                    bidInfos.push_back(createLevelInfos(price, orders));
+
+                for (const auto& [price, orders] : asks_)
+                    askInfos.push_back(createLevelInfos(price, orders));
+            }
              
 };
 
