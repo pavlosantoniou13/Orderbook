@@ -226,7 +226,30 @@ private:
                     {
                         asks_.erase(askPrice);
                     }
+
+                    trades.push_back(Trade{
+                        TradeInfo{ bid->getOrderId(), bid->getPrice(), quantity },
+                        TradeInfo{ ask->getOrderId(), ask->getPrice(), quantity }
+                    });
                 }
+
+                if (!bids.empty())
+                {
+                    auto& [_, bids] = *bids_.begin();
+                    auto& order = bids.front();
+                    if (order->getOrderType() == OrderType::FillAndKill)
+                        CancelOrder(order->getOrderId());
+                }
+                
+                if (!asks_.empty())
+                {
+                    auto& [_, asks] = *asks_.begin();
+                    auto& order = asks.front();
+                    if (order->getOrderType() == OrderType::FillAndKill)
+                        CancelOrder(order->getOrderId());
+                }
+
+                return trades;
         }
     }
 
