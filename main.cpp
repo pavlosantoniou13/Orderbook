@@ -248,12 +248,37 @@ private:
                     if (order->getOrderType() == OrderType::FillAndKill)
                         CancelOrder(order->getOrderId());
                 }
-
-                return trades;
+            }
+               return trades;
         }
-    }
 
-        
+        public: 
+            Trades addOrder(OrderPointer order)
+            {
+                if (orders_.contains(order->getOrderId()))
+                    return { };
+
+                if (order->getOrderType() == OrderType::FillAndKill && !canMatch(order->getSide(), order->getPrice()))
+                    return { };
+
+                OrderPointers::iterator iterator;
+
+                if (order->getSide() == Side::Buy)
+                {
+                    auto& orders = bids_[order->getPrice()];
+                    orders.push_back(order);
+                    iterator = std::next(orders.begin(), orders.size() - 1);
+                }
+                else
+                {
+                    auto& orders = asks_[order->getPrice()];
+                    orders.push_back(order);
+                    iterator = std::next(orders.begin(), orders.size() - 1);
+                }
+
+                orders_.insert({ order->getOrderId(), OrderEntry{ order, iterator} });
+                return MatchOrders();
+            }
 };
 
 
