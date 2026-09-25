@@ -279,6 +279,34 @@ private:
                 orders_.insert({ order->getOrderId(), OrderEntry{ order, iterator} });
                 return MatchOrders();
             }
+
+            void cancelOrder(OrderId orderId)
+            {
+                if (!orders_.contains(orderId))
+                return;
+
+                const auto& [order, iterator] = orders_.at(orderId);
+                orders_.erase(orderId);
+
+                if(order->getSide() == Side::Sell)
+                {
+                    auto price = order->getPrice();
+                    auto& orders = asks_.at(price);
+                    orders.erase(iterator);
+                    if (orders.empty())
+                        asks_.erase(price);
+                }
+                else
+                {
+                    auto price = order->getPrice();
+                    auto& orders = bids_.at(price);
+                    orders.erase(iterator);
+                    if (orders.empty())
+                        bids_.erase(price);
+                }
+            }
+
+             
 };
 
 
