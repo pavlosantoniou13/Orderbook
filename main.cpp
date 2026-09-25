@@ -239,7 +239,7 @@ private:
                     auto& [_, bids] = *bids_.begin();
                     auto& order = bids.front();
                     if (order->getOrderType() == OrderType::FillAndKill)
-                        CancelOrder(order->getOrderId());
+                        cancelOrder(order->getOrderId());
                 }
                 
                 if (!asks_.empty())
@@ -247,7 +247,7 @@ private:
                     auto& [_, asks] = *asks_.begin();
                     auto& order = asks.front();
                     if (order->getOrderType() == OrderType::FillAndKill)
-                        CancelOrder(order->getOrderId());
+                        cancelOrder(order->getOrderId());
                 }
             }
                return trades;
@@ -336,13 +336,19 @@ private:
 
                 for (const auto& [price, orders] : asks_)
                     askInfos.push_back(createLevelInfos(price, orders));
+                
+                return OrderBookLevelInfos{ bidInfos, askInfos }; 
             }
-             
 };
 
 
 
 int main() {
-
+    OrderBook orderBook;
+    const OrderId orderId = 1;
+    orderBook.addOrder(std::make_shared<Order>(OrderType::GoodTillCancel, orderId, Side::Buy, 100, 10));
+    std::cout << orderBook.Size() << std::endl; // 1
+    orderBook.cancelOrder(orderId);
+    std::cout << orderBook.Size() << std::endl;
     return 0;
 }
