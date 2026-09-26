@@ -53,6 +53,34 @@ void OrderBook::PruneGoodForDayOrders()
     }
 }
 
+void OrderBook::cancelOrderInternal(OrderId orderId)
+{
+    if (!orders_.contains(orderId))
+        return;
+    
+    const auto& [order, iterator] = orders_.at(orderId);
+    orders_.erase(orderId);
+
+    if (order->getSide() == Side::Sell)
+    {
+        auto price = order->getPrice();
+        auto& orders = asks_.at(price);
+        orders.erase(iterator);
+        if (orders.empty())
+            asks_.erase(price);
+    }
+    else 
+    {
+        auto price = order->getPrice();
+        auto& orders = bids_.at(price);
+        orders.erase(iterator);
+        if (orders.empty())
+            bids_.erase(price);
+    }
+
+    onOrderCancelled(order);
+}
+
 void OrderBook::onOrderCancelled(OrderPointer order)
 {
     updateLevelData(order->getPrice(), order->getRemainingQuantity(), LevelData::Action::Remove);
