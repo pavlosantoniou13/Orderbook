@@ -45,20 +45,20 @@ void OrderBook::PruneGoodForDayOrders()
                 if (order->getOrderType() != OrderType::GoodForDay)
                     continue;
 
-                orderIds.push_back(order->getOrderType());
+                orderIds.push_back(order->getOrderId());
             }
         }
 
-        cancelOrder(orderIds);
+        cancelOrders(orderIds);
     }
 }
 
-void OrderBook::cancelOrders(OrdersIds orderIds)
+void OrderBook::cancelOrders(OrderIds orderIds)
 {
     std::scoped_lock ordersLock { ordersMutex_ };
 
     for (const auto& orderId : orderIds)
-        CancelOrderInternal(orderId);
+        cancelOrderInternal(orderId);
 }
 
 bool OrderBook::canMatch(Side side, Price price) const 
@@ -136,9 +136,9 @@ Trades OrderBook::MatchOrders()
     return trades;
 }
 
-bool OrderBook::CanFullyFill(Side side, Price price, Quantity quantity) const
+bool OrderBook::canFullyFill(Side side, Price price, Quantity quantity) const
 {
-	if (!CanMatch(side, price))
+	if (!canMatch(side, price))
 		return false;
 
 	std::optional<Price> threshold;
