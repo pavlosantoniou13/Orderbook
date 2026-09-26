@@ -10,10 +10,12 @@
                 "/EHsc",
                 "/nologo",
                 "/std:c++20",
+                "/I${workspaceFolder}\\include",
                 "/Fo${workspaceFolder}\\bin\\",
                 "/Fd${workspaceFolder}\\bin\\",
-                "/Fe${workspaceFolder}\\bin\\${fileBasenameNoExtension}.exe",
-                "${file}"
+                "/Fe${workspaceFolder}\\bin\\main.exe",
+                "${workspaceFolder}\\src\\main.cpp",
+                "${workspaceFolder}\\src\\OrderBook.cpp"
             ],
             "options": {
                 "cwd": "${workspaceFolder}"
@@ -25,7 +27,7 @@
                 "kind": "build",
                 "isDefault": true
             },
-            "detail": "Compiles with MSVC C++20 straight into bin/"
+            "detail": "Compiles OrderBook with MSVC C++20 straight into bin/"
         }
     ]
 }
