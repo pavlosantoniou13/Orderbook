@@ -77,6 +77,44 @@ Trades OrderBook::MatchOrders()
     return trades;
 }
 
+bool OrderBook::CanFullyFill(Side side, Price price, Quantity quantity) const
+{
+	if (!CanMatch(side, price))
+		return false;
+
+	std::optional<Price> threshold;
+
+	if (side == Side::Buy)
+	{
+		const auto [askPrice, _] = *asks_.begin();
+		threshold = askPrice;
+	}
+	else
+	{
+		const auto [bidPrice, _] = *bids_.begin();
+		threshold = bidPrice;
+	}
+
+	for (const auto& [levelPrice, levelData] : data_)
+	{
+		if (threshold.has_value() &&
+			(side == Side::Buy && threshold.value() > levelPrice) ||
+			(side == Side::Sell && threshold.value() < levelPrice))
+			continue;
+
+		if ((side == Side::Buy && levelPrice > price) ||
+			(side == Side::Sell && levelPrice < price))
+			continue;
+
+		if (quantity <= levelData.quantity_)
+			return true;
+
+		quantity -= levelData.quantity_;
+	}
+
+	return false;
+}
+
 Trades OrderBook::addOrder(OrderPointer order)
 {
     if (orders_.contains(order->getOrderId()))
