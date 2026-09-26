@@ -58,6 +58,10 @@ void OrderBook::onOrderCancelled(OrderPointer order)
     updateLevelData(order->getPrice(), order->getRemainingQuantity(), LevelData::Action::Remove);
 }
 
+void OrderBook::onOrderAdded(OrderPointer order)
+{
+    updateLevelData(order->getPrice(), order->getInitialQuantity(), LevelData::Action:Add);
+}
 
 void OrderBook::cancelOrders(OrderIds orderIds)
 {
