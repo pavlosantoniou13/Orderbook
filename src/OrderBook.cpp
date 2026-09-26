@@ -51,6 +51,14 @@ void OrderBook::PruneGoodForDayOrders()
     }
 }
 
+void OrderBook::cancelOrders(OrdersIds orderIds)
+{
+    std::scoped_lock ordersLock { ordersMutex_ };
+
+    for (const auto& orderId : orderIds)
+        CancelOrderInternal(orderId);
+}
+
 bool OrderBook::canMatch(Side side, Price price) const 
 {
     if (side == Side::Buy)
