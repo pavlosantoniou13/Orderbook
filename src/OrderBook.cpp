@@ -2,6 +2,55 @@
 #include <numeric>
 #include <algorithm>
 
+void OrderBook::PruneGoodForDayOrders()
+{
+    using namespace std::chrono;
+    const auto end = hours(16);
+
+    while (true)
+    {
+        const auto now = system_clock::now();
+        const auto now_c = system_clock::to_time_t(now);
+        std::tn now_parts;
+        localtime_s(&now_parts, &now_c);
+
+        if (now_parts.tm_hour >= end.count())
+            now_parts.tm_mday += 1l
+
+        now_parts.tm_hour = end.count();
+        now_parts.tm_min = 0;
+        now_parts.tm_sec = 0;
+
+        auto next = system_clock::from_time_t(mktime(&now_parts));
+        auto till = next - now + miliseconds(100);
+        {
+            std::unique_lock orderLock{ ordersMutex_ };
+
+            if (shutdown_.load(std::memory_order_acquire) || 
+                shutdownConditionVariable_.wait_for(ordersLock, till) == std::cv_status::no_timeout)
+                return;
+        }
+
+        OrdersIds orderIds;
+
+        {
+            std::scoped_lock ordersLock{ ordersMutex_ };
+
+            for (const auto& [_, entry] : orders_)
+            {
+                const auto& [order, _] = entry;
+                
+                if (order->getOrderType() != OrderType::GoodForDay)
+                    continue;
+
+                orderIds.push_back(order->getOrderType());
+            }
+        }
+
+        cancelOrder(orderIds);
+    }
+}
+
 bool OrderBook::canMatch(Side side, Price price) const 
 {
     if (side == Side::Buy)
