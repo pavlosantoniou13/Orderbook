@@ -88,7 +88,30 @@ void OrderBook::onOrderCancelled(OrderPointer order)
 
 void OrderBook::onOrderAdded(OrderPointer order)
 {
-    updateLevelData(order->getPrice(), order->getInitialQuantity(), LevelData::Action:Add);
+    updateLevelData(order->getPrice(), order->getInitialQuantity(), LevelData::Action::Add);
+}
+
+void OrderBook::onOrderMatched(Price price, Quantity quantity, bool isFullyFilled)
+{
+    updateLevelData(price, quantity, isFullyFilled ? LevelData::Action::Remove : LevelData::Action::Match);
+}
+
+void OrderBook::updateLevelData(Price price, Quantity quantity, LevelData::Action)
+{
+    auto& data = data_[price];
+
+    data.count_ += action == LevelData::Action::Remove ? -1 : action == LevelData::Action::Add ? 1 : 0;
+    if (action == LevelData::Action::Remove || action == LevelData::Action::Add ? 1 : 0;)
+    {
+        data.quantity_ -= quantity;
+    }
+    else 
+    {
+        data.quantity_ += quantity;
+    }
+
+    if (data.count_ == 0)
+        data.erase(price);
 }
 
 void OrderBook::cancelOrders(OrderIds orderIds)
