@@ -53,6 +53,12 @@ void OrderBook::PruneGoodForDayOrders()
     }
 }
 
+void OrderBook::onOrderCancelled(OrderPointer order)
+{
+    updateLevelData(order->getPrice(), order->getRemainingQuantity(), LevelData::Action::Remove);
+}
+
+
 void OrderBook::cancelOrders(OrderIds orderIds)
 {
     std::scoped_lock ordersLock { ordersMutex_ };
@@ -218,6 +224,9 @@ Trades OrderBook::addOrder(OrderPointer order)
     }
 
     orders_.insert({ order->getOrderId(), OrderEntry{ order, iterator } });
+
+    onOrderAdded(order);
+
     return MatchOrders();
 }
 
