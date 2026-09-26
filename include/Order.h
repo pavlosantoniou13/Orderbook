@@ -34,7 +34,7 @@ public:
         remainingQuantity_ -= quantity;
     }
 
-    void toGoodTiilCancel(Price price) 
+    void toGoodTillCancel(Price price) 
         {
             if(getOrderType() != OrderType::Market)
                 throw std::logic_error(std::format("Order ({}) cannot have its price adjusted, only market orders can", getOrderId()));
