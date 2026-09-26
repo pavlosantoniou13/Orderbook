@@ -82,7 +82,27 @@ Trades OrderBook::addOrder(OrderPointer order)
     if (orders_.contains(order->getOrderId()))
         return { };
 
+    if (order->getOrderType() == OrderType::Market)
+        {
+            if (order->getSide() == Side::Buy && !asks_.empty())
+            {
+                const auto& [worstAsk, _] = *asks_.rbegin();
+                order->toGoodTillCancel(worstAsk);
+            }
+            else if (order->getSide() == Side::Sell && !bids_.empty())
+            {
+                const auto& [worstBid, _] = *bids_.rbegin();
+                order->toGoodTillCancel(worstBid);
+            }
+            else
+                return { };
+
+        }
+
     if (order->getOrderType() == OrderType::FillAndKill && !canMatch(order->getSide(), order->getPrice()))
+        return { };
+    
+    if (order->getOrderType() == OrderType::FillOrKill && !canFullyFill(order->getSide(), order->getPrice(), order->getInitialQuantity()))
         return { };
 
     OrderPointers::iterator iterator;
