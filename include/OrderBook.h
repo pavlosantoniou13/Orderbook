@@ -35,7 +35,7 @@ private:
     std::map<Price, OrderPointers, std::greater<Price>> bids_;
     std::map<Price, OrderPointers, std::less<Price>> asks_;
     std::unordered_map<OrderId, OrderEntry> orders_;
-    mutable std::mutex orderdMutex_;
+    mutable std::mutex ordersMutex_;
     std::thread ordersPruneThread_;
     std::condition_variable shutdownConditionVariable_;
     std::atomic<bool> shutdown_{ false };
@@ -53,7 +53,6 @@ private:
     bool canFullyFill(Side side, Price price, Quantity quantity) const;
 
     bool canMatch(Side side, Price price) const;
-    bool canFullyFill(Side side, Price price, Quantity quantity) const;
     Trades MatchOrders();
 
 public: 
