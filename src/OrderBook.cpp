@@ -178,6 +178,9 @@ Trades OrderBook::MatchOrders()
                 TradeInfo{ bid->getOrderId(), bid->getPrice(), quantity },
                 TradeInfo{ ask->getOrderId(), ask->getPrice(), quantity }
             });
+
+            onOrderMatched(bid->getPrice(), quantity, bid->isFilled());
+            onOrderMatched(ask->getPrice(), quantity, ask->isFilled());
         }
 
         if (!bids_.empty() && !bids_.begin()->second.empty())
