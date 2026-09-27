@@ -200,6 +200,15 @@ Trades OrderBook::MatchOrders()
     return trades;
 }
 
+OrderBook::OrderBook() : ordersPruneThread_{ [this] { PruneGoodForDayOrders(); } } { }
+
+OrderBook::~OrderBook()
+{
+    shutdown_.store(true, std::memory_order_release);
+	shutdownConditionVariable_.notify_one();
+	ordersPruneThread_.join();
+}
+
 // Can refactor to (canFullyFillBuy / canFullyFillSell) if needed
 bool OrderBook::canFullyFill(Side side, Price price, Quantity quantity) const
 {
