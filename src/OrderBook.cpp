@@ -323,29 +323,6 @@ Trades OrderBook::addOrder(OrderPointer order)
     return MatchOrders();
 }
 
-void OrderBook::cancelOrder(OrderId orderId)
-{
-    if (!orders_.contains(orderId)) return;
-
-    const auto& [order, iterator] = orders_.at(orderId);
-    orders_.erase(orderId);
-
-    if (order->getSide() == Side::Sell)
-    {
-        auto price = order->getPrice();
-        auto& orders = asks_.at(price);
-        orders.erase(iterator);
-        if (orders.empty()) asks_.erase(price);
-    }
-    else
-    {
-        auto price = order->getPrice();
-        auto& orders = bids_.at(price);
-        orders.erase(iterator);
-        if (orders.empty()) bids_.erase(price);
-    }
-}
-
 Trades OrderBook::ModifyOrder(OrderModify order)
 {
     OrderType orderType;
