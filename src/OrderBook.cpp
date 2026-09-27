@@ -96,12 +96,12 @@ void OrderBook::onOrderMatched(Price price, Quantity quantity, bool isFullyFille
     updateLevelData(price, quantity, isFullyFilled ? LevelData::Action::Remove : LevelData::Action::Match);
 }
 
-void OrderBook::updateLevelData(Price price, Quantity quantity, LevelData::Action)
+void OrderBook::updateLevelData(Price price, Quantity quantity, LevelData::Action action)
 {
     auto& data = data_[price];
 
-    data.count_ += action == LevelData::Action::Remove ? -1 : action == LevelData::Action::Add ? 1 : 0;
-    if (action == LevelData::Action::Remove || action == LevelData::Action::Add ? 1 : 0;)
+	data.count_ += action == LevelData::Action::Remove ? -1 : action == LevelData::Action::Add ? 1 : 0;
+	if (action == LevelData::Action::Remove || action == LevelData::Action::Match)
     {
         data.quantity_ -= quantity;
     }
@@ -111,7 +111,7 @@ void OrderBook::updateLevelData(Price price, Quantity quantity, LevelData::Actio
     }
 
     if (data.count_ == 0)
-        data.erase(price);
+        data_.erase(price);
 }
 
 void OrderBook::cancelOrders(OrderIds orderIds)
