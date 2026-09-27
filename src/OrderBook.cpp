@@ -275,6 +275,8 @@ bool OrderBook::canFullyFill(Side side, Price price, Quantity quantity) const
 
 Trades OrderBook::addOrder(OrderPointer order)
 {
+    std::scoped_lock ordersLock{ ordersMutex_ };
+    
     if (orders_.contains(order->getOrderId()))
         return { };
 
