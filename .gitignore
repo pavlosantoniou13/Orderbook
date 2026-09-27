@@ -33,3 +33,10 @@
 
 # Custom Directories
 bin/
+
+# CMake Build Directories
+build/
+OrderBookTest/build/
+CMakeCache.txt
+CMakeFiles/
+cmake-build-debug/

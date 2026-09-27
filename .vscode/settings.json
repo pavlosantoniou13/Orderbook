@@ -1,0 +1,4 @@
+{
+    "cmake.sourceDirectory": "C:/Users/palvo/Documents/GitHub/Orderbook/OrderBookTest",
+    "cmake.buildDirectory": "${workspaceFolder}/OrderBookTest/build"
+}
