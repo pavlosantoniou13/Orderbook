@@ -19,6 +19,7 @@ add_executable(OrderbookTest
 )
 
 target_include_directories(OrderbookTest PRIVATE ../include)
+target_compile_definitions(OrderbookTest PRIVATE ORDERBOOK_TEST_FILES_DIR="${CMAKE_CURRENT_SOURCE_DIR}/TestFiles")
 target_link_libraries(OrderbookTest gtest_main)
 
 include(GoogleTest)

@@ -204,10 +204,9 @@ public:
 class OrderBookTestsFixture : public googletest::TestWithParam<const char*>
 {
     private:
-        const static inline std::filesystem::path Root { std::filesystem::current_path() / ".." / ".." };
-        const static inline std::filesystem::path OrderBookTest { "" };
+        const static inline std::filesystem::path TestFiles { ORDERBOOK_TEST_FILES_DIR };
     public:
-        const static inline std::filesystem::path TestFolderPath { Root / OrderBookTest };
+        const static inline std::filesystem::path TestFolderPath { TestFiles };
 };
 
 TEST_P(OrderBookTestsFixture, OrderBookTestSuite)
