@@ -95,8 +95,8 @@ private:
         while ((endIndex = str.find(delimeter, startIndex)) && endIndex != std::string::npos)
         {
             auto distance = endIndex - startIndex;
-            startIndex = endIndex + 1;
             auto column = str.substr(startIndex, distance);
+            startIndex = endIndex + 1;
             columns.push_back(column);
         }
 
@@ -163,8 +163,11 @@ public:
         std::ifstream file{ path };
         while (std::getline(file, line))
         {
+            if (!line.empty() && line.back() == '\r')
+                line.pop_back();
+
             if (line.empty())
-                break;
+                continue;
 
             const bool isResult = line.at(0) == 'R';
             const bool isUpdate = !isResult;
@@ -201,8 +204,8 @@ public:
 class OrderBookTestsFixture : public googletest::TestWithParam<const char*>
 {
     private:
-        const static inline std::filesystem::path Root { std::filesystem::current_path() };
-        const static inline std::filesystem::path OrderBookTest { "OrderBookTest" };
+        const static inline std::filesystem::path Root { std::filesystem::current_path() / ".." / ".." };
+        const static inline std::filesystem::path OrderBookTest { "" };
     public:
         const static inline std::filesystem::path TestFolderPath { Root / OrderBookTest };
 };
@@ -274,7 +277,7 @@ TEST_P(OrderBookTestsFixture, OrderBookTestSuite)
 
 }
 
-INSTANTIATE_TEST_CASE_P(Tests, OrderbookTestsFixture, googletest::ValuesIn({
+INSTANTIATE_TEST_SUITE_P(Tests, OrderBookTestsFixture, googletest::ValuesIn({
     "Match_GoodTillCancel.txt",
     "Match_FillAndKill.txt",
     "Match_FillOrKill_Hit.txt",
