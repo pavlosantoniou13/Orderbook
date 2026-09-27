@@ -1,13 +1,15 @@
 #pragma once
 #include <map>
 #include <unordered_map>
-#include <vector>
+#include <thread>
+#include <condition_variable>
 #include <mutex>
-#include "OrderType.h"
+
+#include "Usings.h"
 #include "Order.h"
 #include "OrderModify.h"
-#include "Trade.h"
 #include "OrderBookLevelInfos.h"
+#include "Trade.h"
 
 class OrderBook
 {
@@ -56,9 +58,16 @@ private:
     Trades MatchOrders();
 
 public: 
+    OrderBook();
+    OrderBook(const OrderBook&) = delete;
+    void operator=(const OrderBook&) = delete;
+    OrderBook(OrderBook&&) = delete;
+    void operator=(OrderBook&&) = delete;
+    ~OrderBook();
+
     Trades addOrder(OrderPointer order);
     void cancelOrder(OrderId orderId);
-    Trades MatchOrders(OrderModify order);
-    std::size_t Size() const { return orders_.size(); }
+    Trades ModifyOrder(OrderModify order); 
+    std::size_t Size() const;
     OrderBookLevelInfos getOrderInfos() const;
 };
