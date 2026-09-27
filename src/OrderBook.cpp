@@ -200,6 +200,13 @@ Trades OrderBook::MatchOrders()
     return trades;
 }
 
+void OrderBook::cancelOrder(OrderId orderId)
+{
+	std::scoped_lock ordersLock{ ordersMutex_ };
+
+	cancelOrderInternal(orderId);
+}
+
 OrderBook::OrderBook() : ordersPruneThread_{ [this] { PruneGoodForDayOrders(); } } { }
 
 OrderBook::~OrderBook()
