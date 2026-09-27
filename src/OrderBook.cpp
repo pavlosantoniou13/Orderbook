@@ -329,6 +329,12 @@ Trades OrderBook::MatchOrders(OrderModify order)
     return addOrder(order.ToOrderPointer(existingOrder->getOrderType()));
 }
 
+std::size_t OrderBook::Size() const
+{
+	std::scoped_lock ordersLock{ ordersMutex_ };
+	return orders_.size(); 
+}
+
 OrderBookLevelInfos OrderBook::getOrderInfos() const
 {
     LevelInfos bidInfos, askInfos;
