@@ -200,6 +200,7 @@ Trades OrderBook::MatchOrders()
     return trades;
 }
 
+// Can refactor to (canFullyFillBuy / canFullyFillSell) if needed
 bool OrderBook::canFullyFill(Side side, Price price, Quantity quantity) const
 {
 	if (!canMatch(side, price))
