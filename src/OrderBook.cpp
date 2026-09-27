@@ -346,12 +346,22 @@ void OrderBook::cancelOrder(OrderId orderId)
     }
 }
 
-Trades OrderBook::MatchOrders(OrderModify order)
+Trades OrderBook::ModifyOrder(OrderModify order)
 {
-    if (!orders_.contains(order.getOrderId())) return {};
-    const auto& [existingOrder, _] = orders_.at(order.getOrderId());
+    OrderType orderType;
+
+    {
+        std::scoped_lock ordersLock{ ordersMutex_ };
+
+        if (!orders_.contains(order.getOrderId()))
+            return { };
+
+        const auto& [existingOrder, _] = orders_.at(order.getOrderId());
+        orderType = existingOrder->getOrderType();
+    }
+
     cancelOrder(order.getOrderId());
-    return addOrder(order.ToOrderPointer(existingOrder->getOrderType()));
+    return addOrder(order.ToOrderPointer(orderType));
 }
 
 std::size_t OrderBook::Size() const
