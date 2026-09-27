@@ -138,66 +138,84 @@ bool OrderBook::canMatch(Side side, Price price) const
     }
 }
 
-Trades OrderBook::MatchOrders() 
+Trades OrderBook::MatchOrders()
 {
-    Trades trades;
-    trades.reserve(orders_.size());
-    
-    while (!bids_.empty() && !asks_.empty()) 
-    {
-        auto& [bidPrice, bids] = *bids_.begin();
-        auto& [askPrice, asks] = *asks_.begin();
+	Trades trades;
+	trades.reserve(orders_.size());
 
-        if (bidPrice < askPrice) break;
-        
-        while (!bids.empty() && !asks.empty())
+	while (true)
+	{
+		if (bids_.empty() || asks_.empty())
+			break;
+
+		auto& [bidPrice, bids] = *bids_.begin();
+		auto& [askPrice, asks] = *asks_.begin();
+
+		if (bidPrice < askPrice)
+			break;
+
+		while (!bids.empty() && !asks.empty())
+		{
+			auto bid = bids.front();
+			auto ask = asks.front();
+
+			Quantity quantity = std::min(bid->getRemainingQuantity(), ask->getRemainingQuantity());
+
+			bid->Fill(quantity);
+			ask->Fill(quantity);
+
+			if (bid->isFilled())
+			{
+				bids.pop_front();
+				orders_.erase(bid->getOrderId());
+			}
+
+			if (ask->isFilled())
+			{
+				asks.pop_front();
+				orders_.erase(ask->getOrderId());
+			}
+
+
+			trades.push_back(Trade{
+				TradeInfo{ bid->getOrderId(), bid->getPrice(), quantity },
+				TradeInfo{ ask->getOrderId(), ask->getPrice(), quantity } 
+				});
+
+			onOrderMatched(bid->getPrice(), quantity, bid->isFilled());
+			onOrderMatched(ask->getPrice(), quantity, ask->isFilled());
+		}
+
+        if (bids.empty())
         {
-            auto& bid = bids.front();
-            auto& ask = asks.front();
-
-            Quantity quantity = std::min(bid->getRemainingQuantity(), ask->getRemainingQuantity());
-            bid->Fill(quantity);
-            ask->Fill(quantity);
-
-            if (bid->isFilled())
-            {
-                bids.pop_front();
-                orders_.erase(bid->getOrderId());
-            }
-
-            if (ask->isFilled())
-            {
-                asks.pop_front();
-                orders_.erase(ask->getOrderId());
-            }
-
-            if (bids.empty()) bids_.erase(bidPrice);
-            if (asks.empty()) asks_.erase(askPrice);
-
-            trades.push_back(Trade{
-                TradeInfo{ bid->getOrderId(), bid->getPrice(), quantity },
-                TradeInfo{ ask->getOrderId(), ask->getPrice(), quantity }
-            });
-
-            onOrderMatched(bid->getPrice(), quantity, bid->isFilled());
-            onOrderMatched(ask->getPrice(), quantity, ask->isFilled());
+            bids_.erase(bidPrice);
+            data_.erase(bidPrice);
         }
 
-        if (!bids_.empty() && !bids_.begin()->second.empty())
+        if (asks.empty())
         {
-            auto& order = bids_.begin()->second.front();
-            if (order->getOrderType() == OrderType::FillAndKill)
-                cancelOrder(order->getOrderId());
+            asks_.erase(askPrice);
+            data_.erase(askPrice);
         }
-        
-        if (!asks_.empty() && !asks_.begin()->second.empty())
-        {
-            auto& order = asks_.begin()->second.front();
-            if (order->getOrderType() == OrderType::FillAndKill)
-                cancelOrder(order->getOrderId());
-        }
-    }
-    return trades;
+	}
+
+	if (!bids_.empty())
+	{
+		auto& [_, bids] = *bids_.begin();
+		auto& order = bids.front();
+		if (order->getOrderType() == OrderType::FillAndKill)
+			cancelOrder(order->getOrderId());
+	}
+
+	if (!asks_.empty())
+	{
+		auto& [_, asks] = *asks_.begin();
+		auto& order = asks.front();
+		if (order->getOrderType() == OrderType::FillAndKill)
+			cancelOrder(order->getOrderId());
+	}
+
+	return trades;
 }
 
 void OrderBook::cancelOrder(OrderId orderId)
